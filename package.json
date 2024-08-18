@@ -1,18 +1,16 @@
 {
-  "name": "gabrielswebapp",
-  "version": "1.0.0",
-  "description": "A Vite/React app about BMWs",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vite"
-  },
-  "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  },
-  "devDependencies": {
-    "vite": "^4.0.0"
-  },
-  "author": "Gabriel",
-  "license": "MIT"
+    "name": "gabriels-web-app",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview"
+    },
+    "dependencies": {
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "vite": "^4.5.3"
+    }
 }
