@@ -2,68 +2,59 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "gabeuyi1998/gabrielswebapp:latest"
-        AWS_REGION   = "ap-southeast-2"
-        ECS_CLUSTER  = "GabrielsWebAppCluster"
-        ECS_SERVICE  = "GabrielsWebAppService"
+        DOCKERHUB_CREDS = 'dockerhub-token'     // DockerHub credentials in Jenkins
+        AWS_CREDS = 'aws-creds'                 // AWS credentials in Jenkins
+        IMAGE = 'gabeuyi1998/gabewebapp'       // DockerHub image name
+        CLUSTER = 'GabrielsWebAppCluster'       // ECS cluster name
+        SERVICE = 'GabrielsWebAppService'       // ECS service name
+        AWS_DEFAULT_REGION = 'ap-southeast-2'  // Your AWS region
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:gabeuyi1998/GabrielsWebApp.git'
+                checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo "Building app..."
-                sh 'echo Build step placeholder' 
-                // Replace with your actual build command, e.g., npm install or mvn package
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo "Running tests..."
-                sh 'echo Test step placeholder'
-                // Replace with your actual test command
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
-                    sh '''
-                        docker login -u gabeuyi1998 -p $DOCKERHUB_TOKEN
-                        docker build -t $DOCKER_IMAGE .
-                        docker push $DOCKER_IMAGE
-                    '''
+                script {
+                    docker.build("${IMAGE}:latest")
                 }
             }
         }
 
-        stage('Deploy to AWS ECS') {
+        stage('Docker Login') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                    sh '''
-                        aws ecs update-service \
-                            --cluster $ECS_CLUSTER \
-                            --service $ECS_SERVICE \
-                            --force-new-deployment \
-                            --region $AWS_REGION
-                    '''
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CREDS}",
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                sh "docker push ${IMAGE}:latest"
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDS}"]]) {
+                    sh """
+                    aws ecs update-service \
+                        --cluster ${CLUSTER} \
+                        --service ${SERVICE} \
+                        --force-new-deployment
+                    """
                 }
             }
         }
     }
-
-    post {
-        success {
-            echo "Pipeline succeeded!"
-        }
-        failure {
-            echo "Pipeline failed!"
-        }
-    }
-}Jenkinsfile
+}
