@@ -5,8 +5,8 @@ pipeline {
         DOCKERHUB_CREDS = 'dockerhub-token'     // DockerHub credentials in Jenkins
         AWS_CREDS = 'aws-creds'                 // AWS credentials in Jenkins
         IMAGE = 'gabeuyi1998/gabewebapp'       // DockerHub image name
-        CLUSTER = 'GabrielsWebAppCluster'       // ECS cluster name
-        SERVICE = 'GabrielsWebAppService'       // ECS service name
+        CLUSTER = 'GabrielsWebAppCluster'      // ECS cluster name
+        SERVICE = 'GabrielsWebAppService'      // ECS service name
         AWS_DEFAULT_REGION = 'ap-southeast-2'  // Your AWS region
     }
 
@@ -14,6 +14,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
+                // Pulls your code from GitHub using Jenkins credentials
                 checkout scm
             }
         }
