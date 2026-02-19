@@ -1,27 +1,26 @@
-# Use an official Node runtime as a parent image
+# Use Node Alpine
 FROM node:18-alpine
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies ensuring correct architecture binaries are installed
+# Install dependencies
 RUN npm install
-RUN yarn
 
-# Copy the rest of the application, except node_modules
-COPY . /app/.
+# Copy rest of code
+COPY . .
 
-# Build the app for production
+# Build production app
 RUN npm run build
 
-# Install serve to serve the build directory
+# Install serve globally
 RUN npm install -g serve
 
-# Expose port 5173
+# Expose port
 EXPOSE 5173
 
-# Command to run the server
-CMD ["yarn","serve", "-s", "build", "-l", "5173,"npm" "run", "dev", "--", "--host", "0.0.0.0"]
+# Run production server
+CMD ["serve", "-s", "dist", "-l", "5173"]
